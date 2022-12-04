@@ -9,8 +9,8 @@ var schema = new Schema({
     config: [[{type: String}]],
     address: {type: String },
     obs: {type: String },
-    fileimg: {type: String}
-
+    fileimg: {type: String},
+    link: {type: String }
 });
 
 

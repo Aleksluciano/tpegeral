@@ -19,7 +19,7 @@
               <input type="text" class="form-control" id="ponto_nome" placeholder="Digite o nome do ponto" formControlName="name">
 
             </div>
-            <div class="form-group col-md-5">
+            <div class="form-group col-md-2">
               <label>Qtde. Publicadores *</label>
               <input type="number" class="form-control" id="ponto_qtde_publicadores" placeholder="Digite a quantidade" formControlName="npubs">
 
@@ -30,23 +30,28 @@
 
             </div>
             <div class="form-group col-md-12">
+              <label>Link</label>
+              <textarea class="form-control" id="ponto_link" rows="2" formControlName="link"></textarea>
+            </div>
+            <div class="form-group col-md-12">
               <label>Observações</label>
               <textarea class="form-control" id="ponto_obs" rows="2" formControlName="obs"></textarea>
             </div>
-            <div class="form-group">
+
+          <!--  <div class="form-group">
               <label for="exampleFormControlFile1">Imagem *</label>
               <input type="file" class="form-control" id="ponto_imagem" (change)="onFileChanged($event)" formControlName="fileimg">
 
-            </div>
+            </div>-->
           </div>
         </div>
         <div class="modal-footer">
-  
+
           <button type="submit" [disabled]="validMyForm()" class="btn btn-primary">Salvar</button>
-    
+
         </div>
       </form>
-   
+
     </div>
   </div>
 </div>
@@ -94,11 +99,11 @@
   </div>
 
  <!--  <div *ngFor="let point of pontos; let t = index" class='holder'>
-      <img src="/assets/img/{{point.fileimg}}" alt="{{point.name}}"> 
+      <img src="/assets/img/{{point.fileimg}}" alt="{{point.name}}">
   </div> -->
   <div class="row">
   <div *ngFor="let point of pontos; let t = index" class="card" style="width: 18rem;">
-      <img class="card-img-top" src="/assets/img/{{point.fileimg}}" alt="Card image cap">
+      <img class="card-img-top" src="{{point.link}}" alt="Card image cap">
       <div class="card-body">
         <p class="card-text"><b>{{point.name}}</b></p>
       </div>
@@ -113,7 +118,7 @@
 
 
 
-    <!-- 
+    <!--
 </div>
 
 

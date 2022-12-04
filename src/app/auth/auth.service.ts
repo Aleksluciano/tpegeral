@@ -128,7 +128,7 @@ export class AuthService {
             user.telegram,
             user.vezesmes,
             user.contavezes,
-            user.mesescalado         
+            user.mesescalado
           )
           );
         }
@@ -645,7 +645,8 @@ export class AuthService {
             ponto.config,
             ponto.address,
             ponto.obs,
-            ponto.fileimg
+            ponto.fileimg,
+            ponto.link
           )
           );
         }
@@ -1558,13 +1559,13 @@ cadastroTelegram( ) {
             .map((response: Response) => {
               console.log(response,"aquii")
             return response;
-  
-  
+
+
           })
             .catch((error: Response) => {
               return Observable.throw(error.json());
             });
-  
+
           }
 
         anuncioCreate(anuncio: Anuncio) {

@@ -8,7 +8,7 @@
     <!-- Wrapper for slides -->
     <div class="carousel-inner" role="listbox">
       <div *ngFor="let point of pontos; let k = index" [ngClass]="k == 0 ? 'carousel-item active' : 'carousel-item'" style="background-image: url('http://placehold.it/1080x400')">
-        <img src="/assets/img/{{point.fileimg}}" alt="Event Image" id="foto">
+        <img src="{{point.link}}" alt="Event Image" id="foto">
         <div class="carousel-caption">
           <h3 style="font-size: 5.0vh" class="mycaption" >{{point.name}}</h3>
         </div>

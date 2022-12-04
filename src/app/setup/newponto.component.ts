@@ -35,8 +35,9 @@ export class NewpontoComponent implements OnInit {
       name: new FormControl(null, Validators.required),
       npubs: new FormControl(null, Validators.required),
       address: new FormControl(null, Validators.required),
-      obs: new FormControl(null, Validators.required),
-      fileimg: new FormControl(null)
+      obs: new FormControl(null),
+      fileimg: new FormControl(null),
+      link: new FormControl(''),
     });
 
     this.authService.getpontos().subscribe((pontos: Ponto[]) => {
@@ -62,15 +63,16 @@ export class NewpontoComponent implements OnInit {
         null,
         this.pontoForm.value.address,
         this.pontoForm.value.obs,
-        null
+        null,
+        this.pontoForm.value.link
       );
       console.log(this.pontoForm.value);
       console.log(this.pontos);
-      this.authService.pontoImage(this.selectedFile).subscribe(
-        dados => {
-          console.log(dados);
-
-          ponto.fileimg = dados.namefile;
+      // this.authService.pontoImage(this.selectedFile).subscribe(
+      //   dados => {
+      //     console.log(dados);
+      //
+      //     ponto.fileimg = dados.namefile;
           this.authService.pontocreate(ponto).subscribe(
             data => {
               console.log(data);
@@ -81,9 +83,9 @@ export class NewpontoComponent implements OnInit {
             },
             error => console.error(error)
           );
-        },
-        error => console.error(error)
-      );
+
+      //   error => console.error(error)
+      // // );
 
       this.pontoForm.reset();
       this.selectedFile = null;
@@ -92,11 +94,12 @@ export class NewpontoComponent implements OnInit {
       this.pontos[this.pontoindex].npubs = this.pontoForm.value.npubs;
       this.pontos[this.pontoindex].address = this.pontoForm.value.address;
       this.pontos[this.pontoindex].obs = this.pontoForm.value.obs;
-      if (this.selectedFile) {
-        this.authService.pontoImage(this.selectedFile).subscribe(
-          dados => {
-            console.log(dados);
-            this.pontos[this.pontoindex].fileimg = dados.namefile;
+      this.pontos[this.pontoindex].link = this.pontoForm.value.link;
+      //if (this.selectedFile) {
+      //   this.authService.pontoImage(this.selectedFile).subscribe(
+      //     dados => {
+      //       console.log(dados);
+      //       this.pontos[this.pontoindex].fileimg = dados.namefile;
             this.authService
               .pontoEdit(this.pontos[this.pontoindex])
               .subscribe(
@@ -109,23 +112,23 @@ export class NewpontoComponent implements OnInit {
                 },
                 error => console.error(error)
               );
-          },
-          error => console.error(error)
-        );
-      }
-      console.log(this.pontoForm.value);
-      console.log(this.pontos);
 
-
-      this.authService.pontoEdit(this.pontos[this.pontoindex]).subscribe(
-        data => {
-          console.log(data);
-          this.authService.getpontos().subscribe((pontos: Ponto[]) => {
-            this.pontos = pontos;
-          });
-        },
-        error => console.error(error)
-      );
+        //   error => console.error(error)
+        // );
+     // }
+     //  console.log(this.pontoForm.value);
+     //  console.log(this.pontos);
+     //
+     //
+     //  this.authService.pontoEdit(this.pontos[this.pontoindex]).subscribe(
+     //    data => {
+     //      console.log(data);
+     //      this.authService.getpontos().subscribe((pontos: Ponto[]) => {
+     //        this.pontos = pontos;
+     //      });
+     //    },
+     //    error => console.error(error)
+     //  );
 
       this.pontoForm.reset();
       this.onClose();
@@ -139,7 +142,7 @@ export class NewpontoComponent implements OnInit {
       this.pontos[i].name,
       this.pontos[i].npubs,
       this.pontos[i].date,
-      this.pontos[i].id
+      this.pontos[i].id,
     );
 
     this.authService.deleteponto(myponto).subscribe(result => {
@@ -156,10 +159,11 @@ export class NewpontoComponent implements OnInit {
       npubs: this.pontos[i].npubs,
       address: this.pontos[i].address,
       obs: this.pontos[i].obs,
-      fileimg: null
+      fileimg: null,
+      link: this.pontos[i].link,
     });
 
-    
+
     this.edit = true;
     this.pontoindex = i;
     this.display = "block";

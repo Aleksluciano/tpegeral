@@ -245,7 +245,7 @@ router.post('/:date', function (req, res, next) {
 
                   {
                     filename: 'img_ponto.jpeg',
-                    path: reqPath  + `angular/assets/img/${escala[i].pontos[p][u].fileimg}`,
+                    path: `${escala[i].pontos[p][u].link}`,
                     cid: 'img_ponto@logo' // should be as unique as possible
                   }
                 ],

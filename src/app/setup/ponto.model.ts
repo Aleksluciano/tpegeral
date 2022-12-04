@@ -10,7 +10,8 @@ export class Ponto {
                 public config?: any,
                 public address?: string,
                 public obs?: string,
-                public fileimg?: File
+                public fileimg?: File,
+                public link?: string,
 
             ) {}
 
