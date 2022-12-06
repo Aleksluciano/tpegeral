@@ -13,6 +13,7 @@ export class Ponto {
                 public fileimg?: File,
                 public link?: string,
 
+
             ) {}
 
 }

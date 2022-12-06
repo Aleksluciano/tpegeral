@@ -256,6 +256,7 @@ router.post('/:date', function (req, res, next) {
                 if (error) {
                   console.log("Erro no envio para ", escala[i].pontos[p][u].pubs[s].firstName );
                   console.log("Email: ", escala[i].pontos[p][u].pubs[s].email );
+                  console.log("Email: ", escala[i].pontos[p][u]);
                   console.log(error);
                 } else {
                   console.log('Email enviado: ' + info.response + ' ' + escala[i].pontos[p][u].pubs[s].firstName + ' ' + escala[i].pontos[p][u].pubs[s].email  );

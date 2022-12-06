@@ -157,7 +157,7 @@ router.delete("/:id", function(req, res, next) {
 });
 
 router.put("/", function(req, res, next) {
-  console.log("servidor", req.body);
+  console.log("servidor", req.body[0].config[7]);
 
   for (let i = 0; i < req.body.length; i++) {
     Ponto.findById(req.body[i].id, function(err, ponto) {

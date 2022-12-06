@@ -64,7 +64,7 @@ export class SetupComponent {
             this.authService.pontocreate(pontos)
             .subscribe(
             data => {
-                console.log(data);
+
                 this.authService.getpontos()
                 .subscribe(
                 (
@@ -100,7 +100,7 @@ export class SetupComponent {
             this.authService.horaCreate(hora)
             .subscribe(
             data => {
-                console.log(data);
+
                 this.horaForm.reset();
                 this.authService.getHoras()
                 .subscribe(
@@ -142,7 +142,7 @@ export class SetupComponent {
                 this.authService.feriadoCreate(feriado)
                 .subscribe(
                 data => {
-                    console.log(data);
+
                     this.feriadoForm.reset();
 
 
@@ -174,7 +174,7 @@ export class SetupComponent {
                     this.authService.circuitoCreate(feriado)
                     .subscribe(
                     data => {
-                        console.log(data);
+
                         this.circuitoForm.reset();
 
 
@@ -198,7 +198,7 @@ export class SetupComponent {
 
                 onSubmit5() {
 
-                   console.log("mycircuit", this.mycircuit, this.mycircuit.nome)
+
 
                     const congregation = new Congregation(
                         this.congregationForm.value.nome,
@@ -209,7 +209,7 @@ export class SetupComponent {
                         this.authService.congregationCreate(congregation)
                         .subscribe(
                         data => {
-                            console.log(data);
+
                             this.congregationForm.reset();
 
 
@@ -258,7 +258,7 @@ export class SetupComponent {
                              this.authService.validityCreate(validity)
                              .subscribe(
                              data => {
-                                 console.log(data);
+
                                  this.validityForm.reset();
 
 
@@ -398,8 +398,7 @@ export class SetupComponent {
 
     Delete(i){
 
-        console.log("atencao");
-        console.log(this.pontos[i]);
+
      const myponto = new Ponto(
       this.pontos[i].name,
       this.pontos[i].npubs,
@@ -411,7 +410,7 @@ export class SetupComponent {
         this.authService.deleteponto(myponto)
         .subscribe(
             result => {
-                console.log(result)
+
                 this.pontos.splice(i, 1);}
 
     );
@@ -434,10 +433,9 @@ ponto_com_hora = this.pontos.filter(a=>{
                 }
             }
         } );
-console.log("ponto_com_hora", ponto_com_hora);
+
 if (ponto_com_hora.length <= 0){
-        console.log("atencao");
-        console.log(this.horas[i]);
+
      const myhora = new Hora(
       this.horas[i].code,
       this.horas[i].hora,
@@ -448,7 +446,7 @@ if (ponto_com_hora.length <= 0){
         this.authService.deletehora(myhora)
         .subscribe(
             result => {
-                console.log(result)
+
                 this.horas.splice(i, 1);
             }
 
@@ -464,7 +462,7 @@ if (ponto_com_hora.length <= 0){
 
     changed(e: any,ponto: Ponto, hora: Hora){
 
-    console.log(e);
+
     if (e == true){
     if (this.dayselect == 'Segunda-feira')ponto.config[1].push(hora.code);
     if (this.dayselect == 'Terça-feira')ponto.config[2].push(hora.code);
@@ -474,8 +472,7 @@ if (ponto_com_hora.length <= 0){
     if (this.dayselect == 'Sábado')ponto.config[6].push(hora.code);
     if (this.dayselect == 'Domingo')ponto.config[0].push(hora.code);
     if (this.dayselect == 'Feriado')ponto.config[7].push(hora.code);
-    }
-    else{
+    } else{
         if (this.dayselect == 'Segunda-feira')ponto.config[1].splice(ponto.config[1].indexOf(hora.code),1);
         if (this.dayselect == 'Terça-feira')ponto.config[2].splice(ponto.config[2].indexOf(hora.code),1);
         if (this.dayselect == 'Quarta-feira')ponto.config[3].splice(ponto.config[3].indexOf(hora.code),1);
@@ -485,9 +482,10 @@ if (ponto_com_hora.length <= 0){
         if (this.dayselect == 'Domingo')ponto.config[0].splice(ponto.config[0].indexOf(hora.code),1);
         if (this.dayselect == 'Feriado')ponto.config[7].splice(ponto.config[7].indexOf(hora.code),1);
 
+
+
     }
-    console.log(ponto);
-    console.log(this.pontos);
+
 
 
     }
@@ -497,7 +495,7 @@ if (ponto_com_hora.length <= 0){
         this.authService.pontoUpdate(this.pontos)
             .subscribe(
             data => {
-                console.log(data);
+
                 alert("Os dados dos pontos foram atualizados!");
                 this.authService.getpontos()
                 .subscribe(
@@ -515,7 +513,7 @@ if (ponto_com_hora.length <= 0){
     }
 
     valorCheck(ponto: Ponto, hora: Hora){
-    console.log(ponto.config[2].filter(a=> (a == hora.code)), this.dayselect);
+
     let existe = [];
     if (this.dayselect == 'Segunda-feira'){existe = ponto.config[1].filter(a=> a == hora.code); }
     if (this.dayselect == 'Terça-feira'){existe = ponto.config[2].filter(a=> a == hora.code); }
@@ -535,8 +533,7 @@ if (ponto_com_hora.length <= 0){
 
     Delete3(i){
 
-        console.log("atencao");
-        console.log(this.feriados[i]);
+
      const myferiado = new Feriado(
       this.feriados[i].feriado,
       this.feriados[i].data,
@@ -572,8 +569,8 @@ if (ponto_com_hora.length <= 0){
 
     Delete4(i){
 
-        console.log("atencao");
-        console.log(this.circuitos[i]);
+
+
      const mycircuito = new Circuito(
       this.circuitos[i].nome,
       this.circuitos[i].id
@@ -590,8 +587,7 @@ if (ponto_com_hora.length <= 0){
 
     Delete5(i){
 
-        console.log("atencao");
-        console.log(this.congregations[i]);
+
      const mycongregation = new Congregation(
       this.congregations[i].nome,
       this.congregations[i].circuit,
@@ -611,8 +607,6 @@ if (ponto_com_hora.length <= 0){
 
     Delete6(i){
 
-        console.log("atencao");
-        console.log(this.validities[i]);
      const myvalidity = new Validity(
       this.validities[i].begin,
       this.validities[i].end,

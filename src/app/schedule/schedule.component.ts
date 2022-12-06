@@ -297,7 +297,11 @@ let agendahour: Agenda[] = [];
         a.date,
         a.id,
         pubs,
-        a.config
+        a.config,
+        '',
+        '',
+        null,
+        a.link
       ));
       }
     }

@@ -11,59 +11,59 @@ import { Hora } from "./hora.model";
   })
 
   export class ExcelComponent implements OnInit {
-   
+
     dayselect: string = 'Segunda-feira' ;
     pontos: Ponto[] = [];
     diadasemana = 0;
     horas: Hora[] = [];
     diasdasemana = [ "Segunda-feira","Terça-feira","Quarta-feira", "Quinta-feira","Sexta-feira","Sábado","Domingo","Feriado"];
     auth = true;
-  
-    constructor(private authService: AuthService) {}
-  
-ngOnInit() {
-    
 
-    
+    constructor(private authService: AuthService) {}
+
+ngOnInit() {
+
+
+
   this.onAuth();
   this.authService.getpontos()
-        .subscribe( 
+        .subscribe(
         (
-            
+
              pontos: Ponto[]) => {
-            this.pontos = pontos; 
+            this.pontos = pontos;
 
             this.authService.getHoras()
-            .subscribe( 
+            .subscribe(
             (
-                
+
                  horas: Hora[]) => {
-                this.horas = horas; 
-    
+                this.horas = horas;
+
                 let horas_sort = this.horas;
                 horas_sort.sort((a ,b)=>{
                     if(a.code < b.code) return -1;
                     if(a.code > b.code) return 1;
                     return 0;});
                     this.horas = horas_sort;
-    
-    
+
+
                           }
-                          
+
             );
-    
+
              }
-            
+
         );
 
 
-      
-  
+
+
 
     }
-  
+
     changed(e: any,ponto: Ponto, hora: Hora){
-      
+
         console.log(e);
         if (e == true){
         if (this.dayselect == 'Segunda-feira')ponto.config[1].push(hora.code);
@@ -83,37 +83,37 @@ ngOnInit() {
             if (this.dayselect == 'Sexta-feira')ponto.config[5].splice(ponto.config[5].indexOf(hora.code),1);
             if (this.dayselect == 'Sábado')ponto.config[6].splice(ponto.config[6].indexOf(hora.code),1);
             if (this.dayselect == 'Domingo')ponto.config[0].splice(ponto.config[0].indexOf(hora.code),1);
-            if (this.dayselect == 'Feriado')ponto.config[8].splice(ponto.config[8].indexOf(hora.code),1);
-    
+            if (this.dayselect == 'Feriado')ponto.config[7].splice(ponto.config[7].indexOf(hora.code),1);
+
         }
         console.log(ponto);
         console.log(this.pontos);
-    
-        
+
+
         }
-    
+
         salvarConfig(){
-    
+
             this.authService.pontoUpdate(this.pontos)
                 .subscribe(
                 data => {
                     console.log(data);
                     alert("Os dados dos pontos foram atualizados!");
                     this.authService.getpontos()
-                    .subscribe( 
+                    .subscribe(
                     (
-                        
+
                          pontos: Ponto[]) => {
-                        this.pontos = pontos; 
+                        this.pontos = pontos;
                          }
-                        
+
                     );
                 },
                 error => console.error(error)
                 );
-    
+
         }
-    
+
         valorCheck(ponto: Ponto, hora: Hora){
         console.log(ponto.config[2].filter(a=> (a == hora.code)), this.dayselect);
         let existe = [];
@@ -125,34 +125,33 @@ ngOnInit() {
         if (this.dayselect == 'Sábado'){existe = ponto.config[6].filter(a=> a == hora.code); }
         if (this.dayselect == 'Domingo'){existe = ponto.config[0].filter(a=> a == hora.code); }
         if (this.dayselect == 'Feriado'){existe = ponto.config[7].filter(a=> a == hora.code); }
-    
+
         if(existe.length > 0)return true;
-        
+
         return false;
-    
+
         }
-  
- 
+
+
         anteriorDia(e){
-        
+
             this.diadasemana -= 1;
             if (this.diadasemana < 0)this.diadasemana = 7;
             this.dayselect = this.diasdasemana[this.diadasemana];
-    
+
         }
-    
+
         proximoDia(e){
-    
+
             this.diadasemana += 1;
             if (this.diadasemana > 7)this.diadasemana = 0;
             this.dayselect = this.diasdasemana[this.diadasemana];
-    
-    
+
+
         }
-   
+
         onAuth() {
           if (this.authService.isAuthenticated()) this.auth = false;
         }
-    
+
   }
-  

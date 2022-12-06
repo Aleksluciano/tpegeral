@@ -288,7 +288,8 @@ export class NewscheduleComponent implements OnInit {
                 config,
                 a.address,
                 a.obs,
-                a.fileimg
+                a.fileimg,
+                a.link
               )
             );
           }
@@ -358,11 +359,11 @@ export class NewscheduleComponent implements OnInit {
                       continue;
                     }
                   }
-                  
+
                   this.controlaVezesMes(g);
 
                   const newuser = this.makeNewUser(this.usersesc[g]);
-               
+
 
                   newuser.tipoesc = 'A';
                   p.pubs[s] = newuser;
@@ -569,7 +570,7 @@ export class NewscheduleComponent implements OnInit {
                 this.controlaVezesMes(g);
                 if(this.usersesc[g].contavezes > parseInt(this.usersesc[g].vezesmes))break;
 
-         
+
                   const newuser = this.makeNewUser(this.usersesc[g]);
 
                   newuser.tipoesc = 'E';
@@ -768,8 +769,8 @@ export class NewscheduleComponent implements OnInit {
                 }
                 if (semanaigual) { continue; }
 
-                
-             
+
+
 
                 let config = [];
                 config = this.usersesc[g].config;
@@ -780,12 +781,12 @@ export class NewscheduleComponent implements OnInit {
                 if  (dayoptionuser == 7) { dayoptionuser = 0; }
                 for (let i = 0; i < config[dayoptionuser].length; i++) {
                   if (config[dayoptionuser][i].hora == h.code) {
-                  
+
 
                     this.controlaVezesMes(g);
                     if(this.usersesc[g].contavezes > parseInt(this.usersesc[g].vezesmes))break;
-                 
-    
+
+
 
                     const newuser = this.makeNewUser(this.usersesc[g]);
 
@@ -1408,6 +1409,6 @@ controlaVezesMes(g){
       this.usersesc[g].mesescalado = mes.getMonth();
       this.usersesc[g].contavezes = 1;
    }
-    
+
 }
 }
