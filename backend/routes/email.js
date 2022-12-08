@@ -6,6 +6,7 @@ var nodemailer = require('nodemailer');
 var moment = require('moment');
 var telegram = require('../routes/telegram');
 var path = require('path');
+const Ponto = require("../models/ponto");
 
 var socket = null;
 
@@ -136,7 +137,7 @@ Circ: *${j.congregation.circuit}*\n`
 
                     if (req.query.qs0 == 'S') resposta = 'Confirmado, obrigado!';
                     if (req.query.qs0 == 'N') resposta = 'Que pena, vamos tentar achar um substituto...';
-                    console.log(resposta);
+
                     res.render('confirm', { resposta: resposta });
 
                   }
@@ -191,39 +192,40 @@ router.post('/:date', function (req, res, next) {
     }
 
 
+    Ponto.find().exec(function(err, pontos_root) {
+      for (let i = 0; i < escala.length; i++) {
+        for (let p = 0; p < escala[i].pontos.length; p++) {
 
-    for (let i = 0; i < escala.length; i++) {
-      for (let p = 0; p < escala[i].pontos.length; p++) {
+          for (let u = 0; u < escala[i].pontos[p].length; u++) {
 
-        for (let u = 0; u < escala[i].pontos[p].length; u++) {
-
-          for (let s = 0; s < escala[i].pontos[p][u].pubs.length; s++) {
+            for (let s = 0; s < escala[i].pontos[p][u].pubs.length; s++) {
 
 //filtro por email inicio
-            //if ( escala[i].pontos[p][u].pubs[s].email == 'cerjuniorr@gmail.com' ) {
+              //if ( escala[i].pontos[p][u].pubs[s].email == 'cerjuniorr@gmail.com' ) {
 
-              let rand = Math.floor(Math.random() * 6553);
-              let emailhash = new Emailconfirm({
-                idescala: escala[i]._id,
-                iduser: escala[i].pontos[p][u].pubs[s].userId,
-                idhora: escala[i].hora[p].code,
-                hash: rand
-              });
+              // let rand = Math.floor(Math.random() * 6553);
+              // let emailhash = new Emailconfirm({
+              //   idescala: escala[i]._id,
+              //   iduser: escala[i].pontos[p][u].pubs[s].userId,
+              //   idhora: escala[i].hora[p].code,
+              //   hash: rand
+              // });
+              //
+              // emailhash.save(function (err, emailresult) {
+              //   if (err) {
+              //     console.log(err)
+              //   }
+              //   console.log(emailresult);
+              //
+              // });
+              // let hash1 = 'https://#/email/confirm/' + emailhash.hash + '?' + 'qs1=' + emailhash.idescala + '&qs0=S' + '&qs2=' + emailhash.iduser + '&qs3=' + emailhash.idhora;
+              // let hash2 = 'https://#/email/confirm/' + emailhash.hash + '?' + 'qs1=' + emailhash.idescala + '&qs0=N' + '&qs2=' + emailhash.iduser + '&qs3=' + emailhash.idhora;
 
-              emailhash.save(function (err, emailresult) {
-                if (err) {
-                  console.log(err)
-                }
-                console.log(emailresult);
+              let text = emailtext(escala[i].pontos[p][u].pubs[s], escala[i].pontos[p][u], escala[i]);
+              let ponto_link = pontos_root.find(a=> a.id == escala[i].pontos[p][u].id)?.link;
 
-              });
-              let hash1 = 'https://#/email/confirm/' + emailhash.hash + '?' + 'qs1=' + emailhash.idescala + '&qs0=S' + '&qs2=' + emailhash.iduser + '&qs3=' + emailhash.idhora;
-              let hash2 = 'https://#/email/confirm/' + emailhash.hash + '?' + 'qs1=' + emailhash.idescala + '&qs0=N' + '&qs2=' + emailhash.iduser + '&qs3=' + emailhash.idhora;
-
-              let text = emailtext(escala[i].pontos[p][u].pubs[s], escala[i].pontos[p][u], escala[i], hash1, hash2);
-              console.log(text);
               let titulo = `Designação TPE para ${escala[i].pontos[p][u].pubs[s].firstName} ${escala[i].dia}`
-              let mail = { user: escala[i].pontos[p][u].pubs[s], dia: escala[i].dia, hora: escala[i].hora[p].hora }
+              let mail = {user: escala[i].pontos[p][u].pubs[s], dia: escala[i].dia, hora: escala[i].hora[p].hora}
               emails.push(mail);
               let mailOptions = {
                 from: `"TPE" <${SUPORTEMAIL}>`,
@@ -237,15 +239,14 @@ router.post('/:date', function (req, res, next) {
                   {
                     filename: 'tpelogo.png',
                     //path: __dirname + '/pictures/tpelogo.png',
-                    path: reqPath  + `angular/assets/img/tpelogo.png`,
+                    path: reqPath + `angular/assets/img/tpelogo.png`,
                     cid: 'jwlogo@logo' // should be as unique as possible
                   },
 
 
-
                   {
                     filename: 'img_ponto.jpeg',
-                    path: `${escala[i].pontos[p][u].link}`,
+                    path: `${ponto_link}`,
                     cid: 'img_ponto@logo' // should be as unique as possible
                   }
                 ],
@@ -254,48 +255,50 @@ router.post('/:date', function (req, res, next) {
 
               transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
-                  console.log("Erro no envio para ", escala[i].pontos[p][u].pubs[s].firstName );
-                  console.log("Email: ", escala[i].pontos[p][u].pubs[s].email );
+                  console.log("Erro no envio para ", escala[i].pontos[p][u].pubs[s].firstName);
+                  console.log("Email: ", escala[i].pontos[p][u].pubs[s].email);
                   console.log("Email: ", escala[i].pontos[p][u]);
                   console.log(error);
                 } else {
-                  console.log('Email enviado: ' + info.response + ' ' + escala[i].pontos[p][u].pubs[s].firstName + ' ' + escala[i].pontos[p][u].pubs[s].email  );
+                  console.log('Email enviado: ' + info.response + ' ' + escala[i].pontos[p][u].pubs[s].firstName + ' ' + escala[i].pontos[p][u].pubs[s].email);
 
 
                 }
               });
 
-           // }//filtro por email fim
+              // }//filtro por email fim
+            }
           }
         }
       }
-    }
-
-
-
-
-
-
-
-    res.status(200).json({
-      message: 'Emails enviados!',
-      obj: emails
+      transporter.close();
+      res.status(200).json({
+        message: 'Emails enviados!',
+        obj: emails
+      });
     });
+
+
+
+
+
+
+
 
   });
 
-  transporter.close();
+
 
 });
 
-function emailtext(pub, ponto, escala, hash1, hash2) {
+function emailtext(pub, ponto, escala) {
   let corpoemail = []
   for (let p = 0; p < escala.pontos.length; p++) {
 
     for (let u = 0; u < escala.pontos[p].length; u++) {
 
       if (escala.pontos[p][u].id == ponto.id) {
-        console.log("pontoigual", escala.pontos[p][u].id, ponto.id);
+
         corpo = { hora: escala.hora[p], ponto: escala.pontos[p][u] }
         corpoemail.push(corpo);
 
@@ -309,7 +312,7 @@ function emailtext(pub, ponto, escala, hash1, hash2) {
   let ano = moment(diamoment).format('YYYY');
   let diasemana = escala.diasemana;
 
-  console.log(diamoment, escala.dia, dia, mes, ano, diasemana);
+
 
   let estilolinha = ['#eaeaed', '#d2d2d4', '#bdbdbf'];
 
