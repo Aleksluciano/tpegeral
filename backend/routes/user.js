@@ -184,7 +184,7 @@ router.post("/signin", function(req, res, next) {
     )
       role = user.role;
 
-    var token = jwt.sign({ mykey: user._id, role: role }, "secret", {
+    var token = jwt.sign({ mykey: user._id, role: role }, process.env.JWTSECRET, {
       expiresIn: 3600
     });
     return res.status(200).json({
@@ -198,7 +198,7 @@ router.post("/signin", function(req, res, next) {
 });
 
 router.use("/:id", function(req, res, next) {
-  jwt.verify(req.query.token, "secret", function(err, decoded) {
+  jwt.verify(req.query.token, process.env.JWTSECRET, function(err, decoded) {
     if (err) {
       localStorage.clear();
 
