@@ -16,6 +16,7 @@ var schema = new Schema({
     lock: {type: Boolean},
     msg: {},
     data: {type: Date},
+    oldnao: {type: Boolean},
 
 });
 

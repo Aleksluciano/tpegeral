@@ -16,6 +16,7 @@ var UserMaster = require("../models/user");
 localStorage = new LocalStorage("./scratch");
 const SUPORTEMAIL = process.env.SUPORTEMAIL;
 const PASSEMAIL = process.env.PASSEMAIL;
+const JWTSECRET = process.env.JWTSECRET;
 
 router.post("/", function(req, res, next) {
   console.log("req.body.config", req.body.config);
@@ -153,52 +154,56 @@ router.patch("/sendpass", function(req, res, next) {
 
 router.post("/signin", function(req, res, next) {
   console.log("req.body.email:", req.body.email);
-  User.findOne({ email: req.body.email }, function(err, user) {
-    console.log("err:", err);
-    console.log("user:", user);
-    if (err) {
-      return res.status(500).json({
-        title: "Ocorreu um erro12",
-        error: err
-      });
-    }
-    if (!user) {
-      return res.status(401).json({
-        title: "Falha no login",
-        error: { message: "Credenciais inválidas" }
-      });
-    }
-    if (!bcrypt.compareSync(req.body.password, user.password)) {
-      return res.status(401).json({
-        title: "Falha no login",
-        error: { message: "Credenciais inválidas" }
-      });
-    }
+  try {
+    User.findOne({email: req.body.email}, function (err, user) {
+      console.log("err:", err);
+      console.log("user:", user);
+      if (err) {
+        return res.status(500).json({
+          title: "Ocorreu um erro12",
+          error: err
+        });
+      }
+      if (!user) {
+        return res.status(401).json({
+          title: "Falha no login",
+          error: {message: "Credenciais inválidas"}
+        });
+      }
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
+        return res.status(401).json({
+          title: "Falha no login",
+          error: {message: "Credenciais inválidas"}
+        });
+      }
 
-    let role = null;
-    if (
-      user.role == "super" ||
-      user.role == "pleno" ||
-      user.role == "gold" ||
-      user.role == "ctc"
-    )
-      role = user.role;
+      let role = null;
+      if (
+        user.role == "super" ||
+        user.role == "pleno" ||
+        user.role == "gold" ||
+        user.role == "ctc"
+      )
+        role = user.role;
 
-    var token = jwt.sign({ mykey: user._id, role: role }, process.env.JWTSECRET, {
-      expiresIn: 3600
+      var token = jwt.sign({mykey: user._id, role: role}, JWTSECRET, {
+        expiresIn: 3600
+      });
+      return res.status(200).json({
+        message: "Sucesso em logar",
+        token: token,
+        userId: user._id,
+        name: user.firstName,
+        cidade: process.env.CIDADE
+      });
     });
-    return res.status(200).json({
-      message: "Sucesso em logar",
-      token: token,
-      userId: user._id,
-      name: user.firstName,
-      cidade: process.env.CIDADE
-    });
-  });
+  } catch (error) {
+    console.log("Erro signing encontrado:", error);
+  }
 });
 
 router.use("/:id", function(req, res, next) {
-  jwt.verify(req.query.token, process.env.JWTSECRET, function(err, decoded) {
+  jwt.verify(req.query.token, JWTSECRET, function(err, decoded) {
     if (err) {
       localStorage.clear();
 

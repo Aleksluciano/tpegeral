@@ -18,7 +18,8 @@ const Subhist = require("../models/subhist");
 const User2 = require("../models/user");
 const Circuito = require("../models/circuito");
 const { ExportToCsv } = require("export-to-csv");
-const fs = require("fs"); 
+const fs = require("fs");
+const moment = require("moment");
 
 
 
@@ -89,6 +90,8 @@ bot.onText(/\/report (.+)/, (msg, match) => {
   }
 });
 
+
+
 bot.onText(/\/list/, (msg, match) => {
   const chatId = msg.chat.id;
   const mes = match[1];
@@ -106,6 +109,188 @@ bot.onText(/\/list/, (msg, match) => {
   }
 });
 
+bot.onText(/\/status/, (msg, match) => {
+  const chatId = msg.chat.id;
+
+    let diaatual = moment.utc().add(1, "day");
+    let dia = new Date(diaatual);
+    let tomorrowmonth = dia.getMonth();
+    let tomorrowyear = dia.getFullYear();
+    let tomorrowday = dia.getDate();
+
+
+   // let dataini = new Date(tomorrowyear, tomorrowmonth, tomorrowday, 0, 0, 0);
+  let dataini = new Date(2020, 9, 1, 0, 0, 0);
+    //let datafim = new Date(tomorrowyear, tomorrowmonth, tomorrowday, 5, 0, 0);
+  //  console.log(dataini);
+    //console.log(datafim);
+//console.log('chatId', chatId)
+    User.findOne({ telegram: chatId }, function(err, user) {
+      //console.log(user)
+      let emails = "";
+      emails = process.env.COORDENADOREMAILS;
+     // console.log('emails', emails, user.email);
+      let arrayEmails = emails.split(',');
+      if(arrayEmails.includes(user.email)) {
+        Escala.find({
+          data: {$gte: dataini},
+          "pontos": {
+
+            $elemMatch: {
+              $elemMatch: {
+                "pubs.congregation._id": user.congregation.toString(),
+              }
+            }
+
+
+          }
+        }, function (
+          err,
+          escalas
+        ) {
+          if (err) {
+            return console.log("erro schedule");
+          }
+
+          if (escalas.length == 0) {
+            return console.log("sem escala");
+          }
+
+          // console.log('achei', escalas)
+          let registro = [];
+
+
+          let escalasId = [];
+          let usersId = [];
+
+          for (let x = 0; x < escalas.length; x++) {
+            escalasId.push(escalas[x]._id);
+            let escala = escalas[x];
+
+            for (let p = 0; p < escala.pontos.length; p++) {
+              for (let u = 0; u < escala.pontos[p].length; u++) {
+                for (let s = 0; s < escala.pontos[p][u].npubs; s++) {
+                  if (escala.pontos[p][u].pubs[s] && escala.pontos[p][u].pubs[s].congregation._id == user.congregation.toString()) {
+                    let usermainId = escala.pontos[p][u].pubs[s].userId;
+                    let usercompId = s == 0 ? escala.pontos[p][u].pubs[1].userId : escala.pontos[p][u].pubs[0].userId;
+                    registro.push({
+                      idescala: escala._id.toString(),
+                      user: escala.pontos[p][u].pubs[s].userId,
+                      usercomp: s == 0 ? escala.pontos[p][u].pubs[1].userId : escala.pontos[p][u].pubs[0].userId,
+                      usercompname: s == 0 ? escala.pontos[p][u].pubs[1].firstName + " " + escala.pontos[p][u].pubs[1].lastName : escala.pontos[p][u].pubs[0].firstName + " " + escala.pontos[p][u].pubs[0].lastName,
+                      ponto: escala.pontos[p][u].name,
+                      username: escala.pontos[p][u].pubs[s].firstName + " " + escala.pontos[p][u].pubs[s].lastName,
+                      dia: escala.dia,
+                      diasemana: escala.diasemana,
+                      congregacao: escala.pontos[p][u].pubs[s].congregation.nome,
+                      hora: escala.hora[p].hora,
+                      horacode: escala.hora[p].code,
+                      contato: `https://wa.me/55${escala.pontos[p][u].pubs[s].mobilephone}`,
+                      nao: false,
+                      sim: false,
+                      statususer: "🟡",
+                      statuscomp: "🟡",
+                      p: p,
+                      u: u,
+                      s: s
+                    });
+
+                    usersId.push(usermainId);
+                    usersId.push(usercompId);
+                  }
+                }
+              }
+            }
+          }
+
+//console.log(registro);
+
+          Led.find({idescala: {$in: escalasId}, iduser: {$in: usersId}}).exec(function (err, leds) {
+            if (err) {
+              console.log("erro schedule");
+            }
+
+            if (leds.length == 0) {
+              return console.log("erro schedule");
+            }
+
+            for (let i = 0; i < leds.length; i++) {
+              let led = leds[i];
+               led.idescala = led.idescala.toString();
+              let reg = registro.find(a => a.user == led.iduser && a.horacode == led.horacode && a.idescala == led.idescala);
+
+
+              if (reg) {
+                console.log('REG', reg.idescala, led.idescala, reg.idescala == led.idescala,led.sim)
+                if (led.sim) {
+                  reg.statususer = "🟢";
+                } else if (led.nao) {
+                  reg.statususer = "🔴";
+                } else {
+                  reg.statususer = "🟡";
+                }
+              }
+              let regcomp = registro.find(a => a.usercomp == led.iduser && a.horacode == led.horacode && a.idescala == led.idescala);
+
+              if (regcomp) {
+                console.log('REGCOMP', regcomp.idescala, led.idescala, regcomp.idescala == led.idescala,led.sim)
+                if (led.sim) {
+                  regcomp.statuscomp = "🟢";
+                } else if (led.nao) {
+                  regcomp.statuscomp = "🔴";
+                } else {
+                  regcomp.statuscomp = "🟡";
+                }
+                if (led.sub) {
+                  regcomp.statuscomp = "🟢";
+                  regcomp.usercompname = led.sub.firstName + " " + led.sub.lastName;
+                }
+              }
+            }
+            let message = `*Status das próximas designações*`;
+            registro.forEach(function (reg) {
+
+              message += `
+
+Irmão: *${reg.statususer} ${reg.username}*
+Comp: *${reg.statuscomp} ${reg.usercompname}*
+Dia: *${reg.dia} ${reg.diasemana}*
+Hora: *${reg.hora}*
+Ponto: *${reg.ponto}*
+Contato: *${reg.contato}*
+
+`;
+            });
+
+            message += `
+/status
+`
+
+
+            bot.sendMessage(chatId, message, {
+              parse_mode: "Markdown",
+              disable_web_page_preview: true
+            })
+              .then(m => {
+               // console.log(m);
+              })
+              .catch(erro0 => {
+                console.log(erro0);
+              });
+
+           // console.log(message);
+
+          });
+          //console.log(registro)
+
+        });
+      }
+    });
+
+
+
+});
+
 
 // bot.onText(/\/status/, (msg, match) => {
 //   const chatId = msg.chat.id;
@@ -114,7 +299,7 @@ bot.onText(/\/list/, (msg, match) => {
 
 //     User.findOne({ telegram:  chatId})
 //     .exec((err, user) => {
-      
+
 //       if(err){
 //         return console.log("erro");
 //       }
@@ -127,9 +312,9 @@ bot.onText(/\/list/, (msg, match) => {
 //       let datamonth_ini = data1.getMonth();
 //       let datayear_ini = data1.getFullYear();
 //       let dataday_ini = data1.getDate();
-    
+
 //       let dataini = new Date(datayear_ini, datamonth_ini, dataday_ini, 0, 0, 0);
-    
+
 //       console.log(dataini);
 //       console.log(datafim);
 //           Led.find({ iduser: user._id, data: { $gte: dataini } })
@@ -140,18 +325,18 @@ bot.onText(/\/list/, (msg, match) => {
 //               if(err){
 //                 return console.log("erro");
 //               }
-        
+
 //               if(!user){
 //                 return console.log("não encontrou usuário");
 //               }
-        
+
 
 //               let registro = [];
 //               leds.forEach(a => {
 //                 if(!a.lock){
 //                 for (let p = 0; p < a.idescala.pontos.length; p++) {
 //                   for (let u = 0; u < a.idescala.pontos[p].length; u++) {
-              
+
 //                       if (a.idescala.pontos[p][u].pubs[0] == user._id ||
 //                         a.idescala.pontos[p][u].pubs[1] == user._id ||
 //                         ) {
@@ -166,13 +351,13 @@ bot.onText(/\/list/, (msg, match) => {
 //                           sex: escala.pontos[p][u].pubs[s].sex,
 //                         });
 //                       }
-                    
+
 //                   }
 //                 }
 //               }
 
 //               })
-           
+
 //             })
 //           })
 //         })
@@ -233,12 +418,13 @@ function respostaDosIrmaos(mes, chatId) {
                   } else {
                     irmao.substituiu++;
                   }
-                } else if (a.nao && !a.sim) {
-                  irmao.total++;
-                  irmao.recusou++;
-                } else if (!a.nao && !a.sim) {
+                } else if (a?.oldnao || (!a.sim && !a.nao)) {
                   irmao.total++;
                   irmao.semresposta++;
+                }
+                else if (a.nao && !a.sim) {
+                  irmao.total++;
+                  irmao.recusou++;
                 }
               } else {
                 let confirmou = 0;
@@ -260,12 +446,13 @@ function respostaDosIrmaos(mes, chatId) {
                   } else {
                     substituiu++;
                   }
+
+                } else if (a?.oldnao || (!a.sim && !a.nao)) {
+                  total++;
+                  semresposta++;
                 } else if (a.nao && !a.sim) {
                   total++;
                   recusou++;
-                } else if (!a.nao && !a.sim) {
-                  total++;
-                  semresposta++;
                 }
 
                 dados.push({
@@ -596,6 +783,7 @@ bot.on("message", msg => {
   const report = "/report";
   const list = "/list";
   const reset = "/reset";
+  const status = "/status";
   const resppr = "Desculpe não entendi.";
   if (
     !msg.text
@@ -614,7 +802,11 @@ bot.on("message", msg => {
     !msg.text
       .toString()
       .toLowerCase()
-      .includes(reset)
+      .includes(reset) &&
+    !msg.text
+      .toString()
+      .toLowerCase()
+      .includes(status)
   ) {
     try {
       bot.sendMessage(chatId, resppr, { parse_mode: "Markdown" });
